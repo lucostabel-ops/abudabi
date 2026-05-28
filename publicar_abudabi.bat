@@ -31,7 +31,7 @@ if %errorlevel%==0 (
   )
 )
 
-"%GIT%" add index.html README.md netlify.toml .gitignore
+"%GIT%" add index.html control_diario_abudabi_datos.json README.md netlify.toml .gitignore publicar_abudabi.bat
 
 for /f "tokens=1-3 delims=/ " %%a in ('date /t') do set TODAY=%%a-%%b-%%c
 for /f "tokens=1-2 delims=: " %%a in ('time /t') do set NOW=%%a-%%b
@@ -53,3 +53,4 @@ if errorlevel 1 (
 echo.
 echo Listo. GitHub fue actualizado y Netlify publicara automaticamente en unos segundos.
 pause
+

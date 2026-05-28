@@ -703,6 +703,7 @@
 
   <script>
     const STORAGE_KEY = "abudabi-control-diario-v1";
+    const PUBLIC_DATA_FILE = "control_diario_abudabi_datos.json";
     const AUTO_SAVE_DB = "abudabi-control-diario-db";
     const AUTO_SAVE_STORE = "handles";
     const AUTO_SAVE_KEY = "json-file";
@@ -726,6 +727,26 @@
         return { ...structuredClone(initialState), ...JSON.parse(raw) };
       } catch {
         return structuredClone(initialState);
+      }
+    }
+
+    function stateDate(value) {
+      const time = Date.parse(value && value.updatedAt ? value.updatedAt : "");
+      return Number.isNaN(time) ? 0 : time;
+    }
+
+    async function loadPublishedData() {
+      if (location.protocol === "file:") return;
+      try {
+        const response = await fetch(PUBLIC_DATA_FILE, { cache: "no-store" });
+        if (!response.ok) return;
+        const publishedState = { ...structuredClone(initialState), ...await response.json() };
+        if (!localStorage.getItem(STORAGE_KEY) || stateDate(publishedState) > stateDate(state)) {
+          state = publishedState;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+      } catch {
+        // Si el JSON publicado no esta disponible, la app sigue usando los datos locales.
       }
     }
 
@@ -1010,7 +1031,7 @@
                 <span>${escapeHtml(m.client || "Sin cliente")}</span>
                 ${badge(status, statusKind)}
               </div>
-              <p class="hint">${escapeHtml(m.date || "Sin fecha")} · Cobro ${money(m.amount)} · Registrado ${money(movementRegistered(m))} · Saldo ${money(balance)}</p>
+              <p class="hint">${escapeHtml(m.date || "Sin fecha")} ?? Cobro ${money(m.amount)} ?? Registrado ${money(movementRegistered(m))} ?? Saldo ${money(balance)}</p>
               ${m.detail ? `<p>${escapeHtml(m.detail)}</p>` : ""}
             </div>
             <div class="actions">
@@ -1125,7 +1146,7 @@
           .flatMap(article => byArticle[article].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 2));
         const hiddenCount = Math.max(0, groups[brand].length - latestByArticle.length);
         return `<section class="section-block">
-          <h3><span>${escapeHtml(brand)}</span><span class="badge blue">${latestByArticle.length} visibles · ${groups[brand].length} total</span></h3>
+          <h3><span>${escapeHtml(brand)}</span><span class="badge blue">${latestByArticle.length} visibles ?? ${groups[brand].length} total</span></h3>
           <div class="section-body">
             <table>
               <thead><tr><th>Fecha compra</th><th>Articulo</th><th class="num">Precio unitario</th><th>Proveedor</th><th class="num">Cantidad</th><th class="num">Importe</th></tr></thead>
@@ -1451,9 +1472,16 @@
       window.print();
     });
 
-    document.getElementById("movDate").value = new Date().toISOString().slice(0, 10);
-    initAutoSave();
-    render();
+    async function startApp() {
+      await loadPublishedData();
+      document.getElementById("movDate").value = new Date().toISOString().slice(0, 10);
+      await initAutoSave();
+      render();
+    }
+
+    startApp();
   </script>
 </body>
 </html>
+
+

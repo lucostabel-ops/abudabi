@@ -1,4 +1,4 @@
-﻿# Sistema operativo
+# Sistema operativo
 .DS_Store
 Thumbs.db
 desktop.ini
@@ -31,3 +31,5 @@ yarn-error.log*
 *.csv
 *.json
 control_diario_abudabi.html
+!control_diario_abudabi_datos.json
+
