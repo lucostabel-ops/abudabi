@@ -1,0 +1,33 @@
+﻿# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+
+# Netlify local
+.netlify/
+
+# Dependencias o builds futuros
+node_modules/
+dist/
+build/
+
+# Configuracion local y variables privadas
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de trabajo que no forman parte del sitio publico
+*.xlsx
+*.xls
+*.csv
+*.json
+control_diario_abudabi.html

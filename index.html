@@ -1,0 +1,1459 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Control diario Abudabi</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #637083;
+      --line: #d9e0e7;
+      --brand: #0f766e;
+      --brand-strong: #115e59;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --good: #166534;
+      --blue: #1d4ed8;
+      --soft-good: #e8f5ee;
+      --soft-danger: #fdeaea;
+      --soft-warn: #fff4dd;
+      --soft-blue: #e9f0ff;
+      --shadow: 0 8px 24px rgba(15, 23, 42, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: #0f172a;
+      color: white;
+      border-bottom: 1px solid rgba(255, 255, 255, .14);
+    }
+
+    .topbar {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: space-between;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .title p {
+      margin: 3px 0 0;
+      color: #cbd5e1;
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    button, .file-label {
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+    }
+
+    button.primary {
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+    }
+
+    button.primary:hover { background: var(--brand-strong); }
+    button:hover, .file-label:hover { filter: brightness(.97); }
+    button.danger { color: var(--danger); border-color: #f3c7c7; }
+    button.small { padding: 7px 9px; font-size: 12px; }
+    button.icon { padding: 8px 10px; }
+
+    input[type="file"] { display: none; }
+
+    main {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    nav.tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+
+    .tab {
+      border-color: transparent;
+      color: #334155;
+      background: #e9eef4;
+    }
+
+    .tab.active {
+      background: var(--ink);
+      color: white;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .span-12 { grid-column: span 12; }
+    .span-8 { grid-column: span 8; }
+    .span-6 { grid-column: span 6; }
+    .span-4 { grid-column: span 4; }
+    .span-3 { grid-column: span 3; }
+
+    h2, h3 {
+      margin: 0 0 12px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    h2 { font-size: 20px; }
+    h3 { font-size: 16px; }
+
+    .muted { color: var(--muted); }
+    .hint { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 10px;
+      font: inherit;
+      color: var(--ink);
+      background: white;
+    }
+
+    textarea { min-height: 130px; resize: vertical; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      align-items: end;
+    }
+
+    .col-12 { grid-column: span 12; }
+    .col-8 { grid-column: span 8; }
+    .col-6 { grid-column: span 6; }
+    .col-4 { grid-column: span 4; }
+    .col-3 { grid-column: span 3; }
+    .col-2 { grid-column: span 2; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: #f8fafc;
+    }
+
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .nowrap { white-space: nowrap; }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfe;
+      min-height: 92px;
+      overflow: hidden;
+    }
+
+    .kpi span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .kpi strong {
+      display: block;
+      font-size: clamp(18px, 2vw, 26px);
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kpi small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .chart-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcfe;
+    }
+
+    .chart-card h3 {
+      margin-bottom: 14px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 140px minmax(120px, 1fr) 130px;
+      gap: 10px;
+      align-items: center;
+      margin: 10px 0;
+      font-size: 13px;
+    }
+
+    .bar-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #334155;
+    }
+
+    .bar-track {
+      height: 12px;
+      background: #e5eaf0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: var(--w);
+      background: var(--brand);
+      border-radius: 999px;
+    }
+
+    .bar-fill.danger { background: var(--danger); }
+    .bar-fill.blue { background: var(--blue); }
+    .bar-value {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .section-block {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      background: white;
+    }
+
+    tr.new-entry td {
+      background: #fff7d6;
+      border-bottom-color: #f3d47b;
+    }
+
+    .new-marker {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--warn);
+      background: var(--soft-warn);
+      margin-left: 6px;
+    }
+
+    details.price-details {
+      border-top: 1px solid var(--line);
+    }
+
+    details.price-details summary {
+      cursor: pointer;
+      padding: 11px 14px;
+      color: var(--brand);
+      font-weight: 700;
+      background: #fbfcfe;
+    }
+
+    .section-block > h3 {
+      margin: 0;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .section-block .section-body {
+      overflow: auto;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.good { color: var(--good); background: var(--soft-good); }
+    .badge.danger { color: var(--danger); background: var(--soft-danger); }
+    .badge.warn { color: var(--warn); background: var(--soft-warn); }
+    .badge.blue { color: var(--blue); background: var(--soft-blue); }
+
+    .hidden { display: none !important; }
+
+    .movement {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: white;
+    }
+
+    .movement-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .movement-title {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .movement-title strong { font-size: 16px; }
+
+    .records {
+      margin: 8px 0;
+      padding-left: 18px;
+    }
+
+    .records li {
+      margin: 4px 0;
+      line-height: 1.35;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      color: var(--muted);
+      padding: 18px;
+      border-radius: 8px;
+      text-align: center;
+      background: #fbfcfe;
+    }
+
+    .report {
+      background: white;
+      color: #111827;
+      padding: 18px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+
+    .report-section {
+      margin-top: 18px;
+      break-inside: avoid;
+    }
+
+    .report h2 {
+      border-bottom: 2px solid #111827;
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+
+    .report h3 {
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .span-8, .span-6, .span-4, .span-3 { grid-column: span 12; }
+      .kpis, .dashboard-grid { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 1fr; gap: 5px; }
+      .bar-value { text-align: left; }
+      .col-8, .col-6, .col-4, .col-3, .col-2 { grid-column: span 12; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .actions { justify-content: flex-start; }
+    }
+
+    @media print {
+      body { background: white; }
+      header, nav.tabs, .no-print, .panel:not(.printable) { display: none !important; }
+      main { padding: 0; max-width: none; }
+      .report { border: 0; padding: 0; }
+      table { font-size: 12px; }
+      th, td { padding: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="title">
+        <h1>Control diario Abudabi</h1>
+        <p>Cuentas, caja, movimientos de camioneros y entrada de mercaderia.</p>
+      </div>
+      <div class="actions">
+        <button class="primary" id="saveBtn">Guardar</button>
+        <button id="chooseAutoSaveBtn">Elegir JSON autosave</button>
+        <button id="exportBtn">Exportar JSON</button>
+        <label class="file-label" for="importFile">Importar JSON</label>
+        <input id="importFile" type="file" accept="application/json">
+        <button class="danger" id="clearBtn">Vaciar datos</button>
+        <span id="autoSaveStatus" style="color:#cbd5e1;font-size:12px;align-self:center"></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabs no-print" aria-label="Secciones">
+      <button class="tab active" data-tab="resumen">Resumen</button>
+      <button class="tab" data-tab="clientes">Clientes</button>
+      <button class="tab" data-tab="proveedores">Proveedores</button>
+      <button class="tab" data-tab="cajas">Cajas</button>
+      <button class="tab" data-tab="movimientos">Camioneros</button>
+      <button class="tab" data-tab="mercaderia">Entrada mercaderia</button>
+      <button class="tab" data-tab="precios">Lista precios</button>
+      <button class="tab" data-tab="informe">Informe</button>
+    </nav>
+
+    <section id="tab-resumen" class="tab-page">
+      <div class="grid">
+        <div class="panel span-12">
+          <h2>Resumen general</h2>
+          <div class="kpis" id="summaryKpis"></div>
+        </div>
+        <div class="panel span-12">
+          <h2>Tablero</h2>
+          <div class="dashboard-grid">
+            <div class="chart-card">
+              <h3>Cuentas</h3>
+              <div id="accountsChart"></div>
+            </div>
+            <div class="chart-card">
+              <h3>Cajas y camioneros</h3>
+              <div id="cashChart"></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel span-6">
+          <h3>Clientes</h3>
+          <div id="clientSummary"></div>
+        </div>
+        <div class="panel span-6">
+          <h3>Proveedores</h3>
+          <div id="providerSummary"></div>
+        </div>
+        <div class="panel span-12">
+          <h3>Movimientos abiertos o sin cerrar</h3>
+          <div id="openMovementsSummary"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-clientes" class="tab-page hidden">
+      <div class="grid">
+        <div class="panel span-4">
+          <h2>Pegar clientes</h2>
+          <p class="hint">Pega dos columnas: cliente y saldo. Cada carga reemplaza la foto diaria de clientes.</p>
+          <textarea id="clientsPaste" placeholder="CLIENTE&#9;SALDO&#10;CHANGO MAZUR&#9;7372000"></textarea>
+          <div class="actions" style="margin-top:10px">
+            <button class="primary" id="parseClientsBtn">Cargar clientes</button>
+            <button id="clearClientsBtn">Limpiar clientes</button>
+          </div>
+        </div>
+        <div class="panel span-8">
+          <div class="toolbar">
+            <h2>Clientes</h2>
+            <span class="muted" id="clientsCount"></span>
+          </div>
+          <div id="clientsTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-proveedores" class="tab-page hidden">
+      <div class="grid">
+        <div class="panel span-4">
+          <h2>Pegar proveedores</h2>
+          <p class="hint">Pega dos columnas: proveedor y saldo. En proveedores la logica se invierte.</p>
+          <textarea id="providersPaste" placeholder="PROVEEDOR&#9;SALDO&#10;FABIO SOLEMNE&#9;108245815"></textarea>
+          <div class="actions" style="margin-top:10px">
+            <button class="primary" id="parseProvidersBtn">Cargar proveedores</button>
+            <button id="clearProvidersBtn">Limpiar proveedores</button>
+          </div>
+        </div>
+        <div class="panel span-8">
+          <div class="toolbar">
+            <h2>Proveedores</h2>
+            <span class="muted" id="providersCount"></span>
+          </div>
+          <div id="providersTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-cajas" class="tab-page hidden">
+      <div class="grid">
+        <div class="panel span-12">
+          <h2>Cajas</h2>
+          <p class="hint">Caja venta directa se calcula con saldos abiertos/no cerrados de camioneros. Las otras cajas se cargan manualmente.</p>
+          <div class="form-grid">
+            <div class="col-3">
+              <label>Caja venta directa</label>
+              <input id="cashVentaDirecta" disabled>
+            </div>
+            <div class="col-3">
+              <label>Caja general BS AS</label>
+              <input id="cashBsAs" inputmode="decimal">
+            </div>
+            <div class="col-3">
+              <label>Caja general Salta</label>
+              <input id="cashSalta" inputmode="decimal">
+            </div>
+            <div class="col-3">
+              <label>Caja general BS AS dolar</label>
+              <input id="cashDolar" inputmode="decimal">
+            </div>
+          </div>
+          <div class="actions" style="margin-top:12px">
+            <button class="primary" id="saveCashBtn">Guardar cajas</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-movimientos" class="tab-page hidden">
+      <div class="grid">
+        <div class="panel span-12">
+          <h2>Nuevo movimiento de camionero</h2>
+          <div class="form-grid">
+            <div class="col-2">
+              <label>Fecha</label>
+              <input id="movDate" type="date">
+            </div>
+            <div class="col-2">
+              <label>Cobro</label>
+              <input id="movAmount" inputmode="decimal">
+            </div>
+            <div class="col-3">
+              <label>Cliente</label>
+              <input id="movClient">
+            </div>
+            <div class="col-3">
+              <label>Camionero / persona</label>
+              <input id="movDriver">
+            </div>
+            <div class="col-2">
+              <button class="primary" id="addMovementBtn">Agregar</button>
+            </div>
+            <div class="col-12">
+              <label>Detalle inicial</label>
+              <input id="movDetail" placeholder="Opcional">
+            </div>
+          </div>
+        </div>
+        <div class="panel span-12">
+          <div class="toolbar">
+            <h2>Movimientos</h2>
+            <div class="actions">
+              <select id="movementFilter" style="width:auto">
+                <option value="active">Abiertos y en cero sin cerrar</option>
+                <option value="all">Todos</option>
+                <option value="closed">Solo cerrados</option>
+              </select>
+            </div>
+          </div>
+          <div id="movementsList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-mercaderia" class="tab-page hidden">
+      <div class="grid">
+        <div class="panel span-4">
+          <h2>Pegar entrada de mercaderia</h2>
+          <p class="hint">Pega columnas: fecha, cantidad, importe, articulo y proveedor. Relleno se extrae del articulo y pallet se calcula.</p>
+          <textarea id="merchPaste" placeholder="Fecha&#9;Cantidad&#9;Importe&#9;Articulo&#9;Proveedor"></textarea>
+          <div class="actions" style="margin-top:10px">
+            <button class="primary" id="parseMerchBtn">Agregar compras</button>
+          </div>
+        </div>
+        <div class="panel span-8">
+          <h2>Completar transporte</h2>
+          <p class="hint">Despues de pegar, podes completar equipo, chofer, pago, fecha y detalle.</p>
+          <div id="merchTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-precios" class="tab-page hidden">
+      <div class="grid">
+        <div class="panel span-12">
+          <div class="toolbar">
+            <div>
+              <h2>Lista de precios por marca</h2>
+              <p class="hint">Se genera automaticamente desde Entrada de mercaderia. Precio unitario = Importe / Cantidad.</p>
+            </div>
+            <input id="priceSearch" placeholder="Buscar marca, articulo o proveedor" style="max-width:320px">
+          </div>
+          <div id="priceList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-informe" class="tab-page hidden">
+      <div class="panel span-12 printable">
+        <div class="toolbar no-print">
+          <h2>Informe para enviar</h2>
+          <button class="primary" id="printBtn">Imprimir / guardar PDF</button>
+        </div>
+        <div id="reportOutput" class="report"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "abudabi-control-diario-v1";
+    const AUTO_SAVE_DB = "abudabi-control-diario-db";
+    const AUTO_SAVE_STORE = "handles";
+    const AUTO_SAVE_KEY = "json-file";
+
+    const initialState = {
+      clients: [],
+      providers: [],
+      cash: { bsas: 0, salta: 0, dolar: 0 },
+      movements: [],
+      merchandise: [],
+      updatedAt: null
+    };
+
+    let state = loadState();
+    let autoSaveHandle = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(initialState);
+        return { ...structuredClone(initialState), ...JSON.parse(raw) };
+      } catch {
+        return structuredClone(initialState);
+      }
+    }
+
+    function saveState() {
+      state.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+      queueAutoSave();
+    }
+
+    function jsonPayload() {
+      return JSON.stringify(state, null, 2);
+    }
+
+    function setAutoSaveStatus(text) {
+      const el = document.getElementById("autoSaveStatus");
+      if (el) el.textContent = text || "";
+    }
+
+    function openAutoSaveDb() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(AUTO_SAVE_DB, 1);
+        request.onupgradeneeded = () => request.result.createObjectStore(AUTO_SAVE_STORE);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function getStoredHandle() {
+      if (!("indexedDB" in window)) return null;
+      const db = await openAutoSaveDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(AUTO_SAVE_STORE, "readonly");
+        const request = tx.objectStore(AUTO_SAVE_STORE).get(AUTO_SAVE_KEY);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function storeHandle(handle) {
+      const db = await openAutoSaveDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(AUTO_SAVE_STORE, "readwrite");
+        tx.objectStore(AUTO_SAVE_STORE).put(handle, AUTO_SAVE_KEY);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    async function writeJsonToHandle(showAlert) {
+      if (!autoSaveHandle) return;
+      try {
+        const writable = await autoSaveHandle.createWritable();
+        await writable.write(jsonPayload());
+        await writable.close();
+        setAutoSaveStatus("JSON autosave activo");
+      } catch (error) {
+        setAutoSaveStatus("Autosave requiere permiso");
+        if (showAlert) alert("No se pudo guardar el JSON automaticamente. Elegi el archivo de nuevo.");
+      }
+    }
+
+    let autoSaveTimer = null;
+
+    function queueAutoSave() {
+      if (!autoSaveHandle) return;
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = setTimeout(() => writeJsonToHandle(false), 400);
+    }
+
+    async function initAutoSave() {
+      if (!("showSaveFilePicker" in window)) {
+        setAutoSaveStatus("Autosave JSON no disponible");
+        return;
+      }
+      try {
+        autoSaveHandle = await getStoredHandle();
+        setAutoSaveStatus(autoSaveHandle ? "JSON autosave activo" : "JSON autosave sin elegir");
+      } catch {
+        setAutoSaveStatus("JSON autosave sin elegir");
+      }
+    }
+
+    function money(value) {
+      const n = Number(value || 0);
+      const sign = n < 0 ? "-" : "";
+      return sign + "$" + Math.abs(n).toLocaleString("es-AR", {
+        minimumFractionDigits: Number.isInteger(Math.abs(n)) ? 0 : 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function parseMoney(input) {
+      if (input === null || input === undefined) return 0;
+      let text = String(input).trim();
+      if (!text) return 0;
+      const negative = text.includes("-");
+      text = text.replace(/[^\d,.-]/g, "");
+      if (text.includes(",") && text.includes(".")) {
+        text = text.replace(/\./g, "").replace(",", ".");
+      } else if (text.includes(",")) {
+        text = text.replace(",", ".");
+      } else {
+        text = text.replace(/\.(?=\d{3}(\D|$))/g, "");
+      }
+      const n = Number(text.replace(/-/g, ""));
+      return (negative ? -1 : 1) * (Number.isFinite(n) ? n : 0);
+    }
+
+    function extractAmounts(text) {
+      const matches = String(text || "").match(/-?\$?\s*\d[\d.,]*/g) || [];
+      return matches.map(parseMoney).filter(n => Number.isFinite(n) && n !== 0);
+    }
+
+    function parseRows(text) {
+      return String(text || "")
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean)
+        .map(line => {
+          const cols = line.includes("\t") ? line.split("\t") : line.split(/ {2,}/);
+          return cols.map(c => c.trim());
+        });
+    }
+
+    function parseTwoColumn(text, nameKey) {
+      const rows = parseRows(text);
+      return rows
+        .filter(cols => cols.length >= 2)
+        .filter(cols => !/saldo/i.test(cols[1]) && !/(cliente|proveedor)/i.test(cols[0]))
+        .map(cols => ({ id: crypto.randomUUID(), [nameKey]: cols[0], balance: parseMoney(cols[1]) }))
+        .filter(row => row[nameKey] && Number.isFinite(row.balance));
+    }
+
+    function statusForClient(balance) {
+      return balance >= 0 ? "NOS DEBEN" : "DEBEMOS";
+    }
+
+    function statusForProvider(balance) {
+      return balance >= 0 ? "DEBEMOS" : "NOS DEBEN";
+    }
+
+    function accountTotals(rows, type) {
+      let nosDeben = 0;
+      let debemos = 0;
+      rows.forEach(row => {
+        const value = Number(row.balance || 0);
+        if (type === "clients") {
+          if (value >= 0) nosDeben += value;
+          else debemos += Math.abs(value);
+        } else {
+          if (value >= 0) debemos += value;
+          else nosDeben += Math.abs(value);
+        }
+      });
+      const net = type === "clients" ? nosDeben - debemos : debemos - nosDeben;
+      const finalStatus = type === "clients"
+        ? (net >= 0 ? "NOS DEBEN" : "DEBEMOS")
+        : (net >= 0 ? "DEBEMOS" : "NOS DEBEN");
+      return { nosDeben, debemos, net, finalStatus };
+    }
+
+    function movementRegistered(movement) {
+      return (movement.records || []).reduce((sum, record) => sum + Number(record.amount || 0), 0);
+    }
+
+    function movementBalance(movement) {
+      return Number(movement.amount || 0) - movementRegistered(movement);
+    }
+
+    function movementStatus(movement) {
+      if (movement.closed) return "CERRADO";
+      const registered = movementRegistered(movement);
+      const balance = movementBalance(movement);
+      if (balance === 0 && registered > 0) return "EN CERO SIN CERRAR";
+      if (registered > 0) return "PARCIAL";
+      return "PENDIENTE";
+    }
+
+    function openMovementBalance() {
+      return state.movements
+        .filter(m => !m.closed)
+        .reduce((sum, movement) => sum + movementBalance(movement), 0);
+    }
+
+    function extractRelleno(article) {
+      const text = String(article || "");
+      const match = text.match(/[xX]\s*(\d+)\s*$/) || text.match(/[xX]\s*(\d+)(?!.*[xX]\s*\d)/);
+      return match ? Number(match[1]) : 0;
+    }
+
+    function inferBrand(article) {
+      const original = String(article || "").trim();
+      const upper = original.toUpperCase();
+      const known = [
+        "SCHNEIDER", "CORONA", "PEPSI", "COCA COLA", "BUDWEISER", "SOLEMNE",
+        "CASALIVA", "ADES", "QUILMES", "BRAHMA", "STELLA", "HEINEKEN",
+        "NESTOR", "GUIDO"
+      ];
+      const found = known.find(brand => upper.includes(brand));
+      if (found) return found;
+      const cleaned = upper
+        .replace(/^\*/, "")
+        .replace(/\b(CERVEZA|GASEOSA|ACEITE|JUGO|CAJONES|VACIOS|AGUA|VINO|FERNET)\b/g, "")
+        .replace(/\b(BOTELLA|LATA|LATON|MEZCLA|DE|DEL)\b/g, "")
+        .replace(/\b\d+[,.]?\d*\s*(ML|L|LT|LTS|CC)\b/g, "")
+        .replace(/[-/].*$/g, "")
+        .replace(/\b\d+\s*[Xx]\s*\d+\b/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      return cleaned.split(" ").slice(0, 2).join(" ") || "SIN MARCA";
+    }
+
+    function normalizeDate(value) {
+      const text = String(value || "").trim();
+      if (!text) return "";
+      const d = new Date(text);
+      if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+      return text;
+    }
+
+    function badge(text, kind) {
+      return `<span class="badge ${kind}">${text}</span>`;
+    }
+
+    function renderAccountTable(rows, type) {
+      const nameKey = type === "clients" ? "client" : "provider";
+      const statusFn = type === "clients" ? statusForClient : statusForProvider;
+      const totals = accountTotals(rows, type);
+      if (!rows.length) return `<div class="empty">Sin datos cargados.</div>`;
+      const body = rows.map(row => {
+        const status = statusFn(row.balance);
+        const kind = status === "NOS DEBEN" ? "good" : "danger";
+        return `<tr>
+          <td>${escapeHtml(row[nameKey])}</td>
+          <td class="num nowrap">${money(row.balance)}</td>
+          <td>${badge(status, kind)}</td>
+        </tr>`;
+      }).join("");
+      return `<table>
+        <thead><tr><th>Nombre</th><th class="num">Saldo</th><th>Estado</th></tr></thead>
+        <tbody>${body}</tbody>
+        <tfoot>
+          <tr><th>Total nos deben</th><th class="num">${money(totals.nosDeben)}</th><th></th></tr>
+          <tr><th>Total debemos</th><th class="num">${money(totals.debemos)}</th><th></th></tr>
+          <tr><th>Neto</th><th class="num">${money(totals.net)}</th><th>${badge(totals.finalStatus, totals.finalStatus === "NOS DEBEN" ? "good" : "danger")}</th></tr>
+        </tfoot>
+      </table>`;
+    }
+
+    function renderAccountSummary(rows, type) {
+      const totals = accountTotals(rows, type);
+      return `<div class="kpis">
+        <div class="kpi"><span>Total nos deben</span><strong>${money(totals.nosDeben)}</strong></div>
+        <div class="kpi"><span>Total debemos</span><strong>${money(totals.debemos)}</strong></div>
+        <div class="kpi"><span>Neto</span><strong>${money(totals.net)}</strong></div>
+        <div class="kpi"><span>Estado</span><strong>${totals.finalStatus}</strong></div>
+      </div>`;
+    }
+
+    function renderMovements() {
+      const filter = document.getElementById("movementFilter").value;
+      let movements = [...state.movements].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      if (filter === "active") movements = movements.filter(m => !m.closed);
+      if (filter === "closed") movements = movements.filter(m => m.closed);
+      if (!movements.length) {
+        document.getElementById("movementsList").innerHTML = `<div class="empty">Sin movimientos para mostrar.</div>`;
+        return;
+      }
+      document.getElementById("movementsList").innerHTML = movements.map(m => {
+        const balance = movementBalance(m);
+        const status = movementStatus(m);
+        const statusKind = m.closed ? "blue" : balance === 0 ? "warn" : "good";
+        const records = (m.records || []).length
+          ? `<ul class="records">${m.records.map(r => `<li><strong>${escapeHtml(r.type)}</strong>: ${money(r.amount)}${r.note ? ` - ${escapeHtml(r.note)}` : ""}</li>`).join("")}</ul>`
+          : `<p class="muted">Sin registros cargados.</p>`;
+        return `<article class="movement" data-id="${m.id}">
+          <div class="movement-head">
+            <div>
+              <div class="movement-title">
+                <strong>${escapeHtml(m.driver || "Sin camionero")}</strong>
+                <span>${escapeHtml(m.client || "Sin cliente")}</span>
+                ${badge(status, statusKind)}
+              </div>
+              <p class="hint">${escapeHtml(m.date || "Sin fecha")} · Cobro ${money(m.amount)} · Registrado ${money(movementRegistered(m))} · Saldo ${money(balance)}</p>
+              ${m.detail ? `<p>${escapeHtml(m.detail)}</p>` : ""}
+            </div>
+            <div class="actions">
+              <button class="small" data-action="toggle-close">${m.closed ? "Reabrir" : "Marcar cerrado"}</button>
+              <button class="small danger" data-action="delete-movement">Eliminar</button>
+            </div>
+          </div>
+          ${records}
+          <div class="form-grid">
+            <div class="col-3">
+              <label>Tipo de registro</label>
+              <select data-field="record-type">
+                <option>Se recibe en caja</option>
+                <option>Pago proveedor</option>
+                <option>Traspaso a camionero</option>
+                <option>Perdida / diferencia</option>
+                <option>Otro registro</option>
+              </select>
+            </div>
+            <div class="col-3">
+              <label>Importe</label>
+              <input data-field="record-amount" inputmode="decimal">
+            </div>
+            <div class="col-4">
+              <label>Nota</label>
+              <input data-field="record-note">
+            </div>
+            <div class="col-2">
+              <button class="primary" data-action="add-record">Agregar registro</button>
+            </div>
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    function renderMerchandise() {
+      if (!state.merchandise.length) {
+        document.getElementById("merchTable").innerHTML = `<div class="empty">Sin entradas de mercaderia cargadas.</div>`;
+        return;
+      }
+      const sortedItems = [...state.merchandise].sort((a, b) => {
+        if (!!b.isNew !== !!a.isNew) return Number(!!b.isNew) - Number(!!a.isNew);
+        return String(b.createdAt || b.date || "").localeCompare(String(a.createdAt || a.date || ""));
+      });
+      const rows = sortedItems.map(item => {
+        const pallet = item.relleno ? Number(item.quantity || 0) / Number(item.relleno || 1) : 0;
+        return `<tr data-id="${item.id}" class="${item.isNew ? "new-entry" : ""}">
+          <td><input data-merch="date" value="${escapeAttr(item.date)}" style="min-width:128px"></td>
+          <td class="num">${Number(item.quantity || 0).toLocaleString("es-AR")}</td>
+          <td class="num">${money(item.amount)}</td>
+          <td><input data-merch="brand" value="${escapeAttr(item.brand || inferBrand(item.article))}" style="min-width:120px"></td>
+          <td>${escapeHtml(item.article)}${item.isNew ? `<span class="new-marker">NUEVA</span>` : ""}</td>
+          <td>${escapeHtml(item.provider)}</td>
+          <td class="num">${item.relleno || ""}</td>
+          <td class="num">${pallet ? pallet.toLocaleString("es-AR", { maximumFractionDigits: 2 }) : ""}</td>
+          <td><input data-merch="team" value="${escapeAttr(item.team)}"></td>
+          <td><input data-merch="driver" value="${escapeAttr(item.driver)}"></td>
+          <td><input data-merch="payment" value="${escapeAttr(item.payment)}"></td>
+          <td><input data-merch="detail" value="${escapeAttr(item.detail)}"></td>
+          <td><button class="small danger" data-action="delete-merch">Eliminar</button></td>
+        </tr>`;
+      }).join("");
+      document.getElementById("merchTable").innerHTML = `<div style="overflow:auto">
+        <table>
+          <thead><tr><th>Fecha</th><th class="num">Cantidad</th><th class="num">Importe</th><th>Marca</th><th>Articulo</th><th>Proveedor</th><th class="num">Relleno</th><th class="num">Pallet</th><th>Equipo</th><th>Chofer</th><th>Pago</th><th>Detalle</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    }
+
+    function renderPriceList() {
+      const query = String(document.getElementById("priceSearch")?.value || "").toUpperCase().trim();
+      const entries = state.merchandise
+        .map(item => ({
+          ...item,
+          brand: item.brand || inferBrand(item.article),
+          unitPrice: Number(item.quantity || 0) ? Number(item.amount || 0) / Number(item.quantity || 0) : 0
+        }))
+        .filter(item => !query || [item.brand, item.article, item.provider].join(" ").toUpperCase().includes(query))
+        .sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(a.brand).localeCompare(String(b.brand)) || String(a.article).localeCompare(String(b.article)));
+
+      if (!entries.length) {
+        document.getElementById("priceList").innerHTML = `<div class="empty">Sin datos para lista de precios.</div>`;
+        return;
+      }
+
+      const groups = entries.reduce((acc, item) => {
+        const brand = item.brand || "SIN MARCA";
+        if (!acc[brand]) acc[brand] = [];
+        acc[brand].push(item);
+        return acc;
+      }, {});
+
+      const renderRows = items => items.map(item => `<tr>
+        <td class="nowrap">${escapeHtml(item.date)}</td>
+        <td>${escapeHtml(item.article)}</td>
+        <td class="num nowrap">${money(item.unitPrice)}</td>
+        <td>${escapeHtml(item.provider)}</td>
+        <td class="num nowrap">${Number(item.quantity || 0).toLocaleString("es-AR")}</td>
+        <td class="num nowrap">${money(item.amount)}</td>
+      </tr>`).join("");
+
+      document.getElementById("priceList").innerHTML = Object.keys(groups).sort().map(brand => {
+        const byArticle = groups[brand].reduce((acc, item) => {
+          const article = item.article || "SIN ARTICULO";
+          if (!acc[article]) acc[article] = [];
+          acc[article].push(item);
+          return acc;
+        }, {});
+        const latestByArticle = Object.keys(byArticle)
+          .sort()
+          .flatMap(article => byArticle[article].sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 2));
+        const hiddenCount = Math.max(0, groups[brand].length - latestByArticle.length);
+        return `<section class="section-block">
+          <h3><span>${escapeHtml(brand)}</span><span class="badge blue">${latestByArticle.length} visibles · ${groups[brand].length} total</span></h3>
+          <div class="section-body">
+            <table>
+              <thead><tr><th>Fecha compra</th><th>Articulo</th><th class="num">Precio unitario</th><th>Proveedor</th><th class="num">Cantidad</th><th class="num">Importe</th></tr></thead>
+              <tbody>${renderRows(latestByArticle)}</tbody>
+            </table>
+          </div>
+          <details class="price-details">
+            <summary>Ver marca completa${hiddenCount ? ` (${hiddenCount} precios anteriores)` : ""}</summary>
+            <div class="section-body">
+              <table>
+                <thead><tr><th>Fecha compra</th><th>Articulo</th><th class="num">Precio unitario</th><th>Proveedor</th><th class="num">Cantidad</th><th class="num">Importe</th></tr></thead>
+                <tbody>${renderRows(groups[brand])}</tbody>
+              </table>
+            </div>
+          </details>
+        </section>`;
+      }).join("");
+    }
+
+    function renderReport() {
+      const activeMovements = state.movements.filter(m => !m.closed);
+      const movementRows = activeMovements.length
+        ? activeMovements.map(m => {
+            const records = (m.records || []).length
+              ? `<ul>${m.records.map(r => `<li>${escapeHtml(r.type)}: ${money(r.amount)}${r.note ? ` - ${escapeHtml(r.note)}` : ""}</li>`).join("")}</ul>`
+              : "Sin registros cargados";
+            return `<tr>
+              <td>${escapeHtml(m.date)}</td>
+              <td>${escapeHtml(m.client)}</td>
+              <td>${escapeHtml(m.driver)}</td>
+              <td class="num">${money(m.amount)}</td>
+              <td>${records}</td>
+              <td class="num">${money(movementBalance(m))}</td>
+              <td>${movementStatus(m)}</td>
+            </tr>`;
+          }).join("")
+        : `<tr><td colspan="7">Sin movimientos abiertos.</td></tr>`;
+
+      document.getElementById("reportOutput").innerHTML = `
+        <h2>Informe diario</h2>
+        <p class="muted">Generado: ${new Date().toLocaleString("es-AR")}</p>
+        <div class="report-section">
+          <h3>Cajas</h3>
+          <table>
+            <tbody>
+              <tr><th>Caja venta directa</th><td class="num">${money(openMovementBalance())}</td></tr>
+              <tr><th>Caja general BS AS</th><td class="num">${money(state.cash.bsas)}</td></tr>
+              <tr><th>Caja general Salta</th><td class="num">${money(state.cash.salta)}</td></tr>
+              <tr><th>Caja general BS AS dolar</th><td class="num">${money(state.cash.dolar)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="report-section">
+          <h3>Clientes</h3>
+          ${renderAccountTable(state.clients, "clients")}
+        </div>
+        <div class="report-section">
+          <h3>Proveedores</h3>
+          ${renderAccountTable(state.providers, "providers")}
+        </div>
+        <div class="report-section">
+          <h3>Movimientos camioneros</h3>
+          <table>
+            <thead><tr><th>Fecha</th><th>Cliente</th><th>Camionero</th><th class="num">Cobro</th><th>Registros</th><th class="num">Saldo</th><th>Estado</th></tr></thead>
+            <tbody>${movementRows}</tbody>
+          </table>
+        </div>`;
+    }
+
+    function renderBarChart(containerId, rows) {
+      const max = Math.max(...rows.map(row => Math.abs(row.value)), 1);
+      document.getElementById(containerId).innerHTML = rows.map(row => {
+        const width = Math.max(2, Math.round((Math.abs(row.value) / max) * 100));
+        return `<div class="bar-row">
+          <div class="bar-label" title="${escapeAttr(row.label)}">${escapeHtml(row.label)}</div>
+          <div class="bar-track"><div class="bar-fill ${row.kind || ""}" style="--w:${width}%"></div></div>
+          <div class="bar-value">${money(row.value)}</div>
+        </div>`;
+      }).join("");
+    }
+
+    function render() {
+      const clientTotals = accountTotals(state.clients, "clients");
+      const providerTotals = accountTotals(state.providers, "providers");
+      const cashVentaDirecta = openMovementBalance();
+      document.getElementById("summaryKpis").innerHTML = `
+        <div class="kpi"><span>Caja venta directa</span><strong title="${money(cashVentaDirecta)}">${money(cashVentaDirecta)}</strong><small>Saldos abiertos de camioneros</small></div>
+        <div class="kpi"><span>Neto clientes</span><strong title="${money(clientTotals.net)}">${money(clientTotals.net)}</strong><small>${clientTotals.finalStatus}</small></div>
+        <div class="kpi"><span>Neto proveedores</span><strong title="${money(providerTotals.net)}">${money(providerTotals.net)}</strong><small>${providerTotals.finalStatus}</small></div>
+        <div class="kpi"><span>Movimientos abiertos</span><strong>${state.movements.filter(m => !m.closed).length}</strong><small>${state.movements.filter(m => movementStatus(m) === "EN CERO SIN CERRAR").length} en cero sin cerrar</small></div>`;
+      renderBarChart("accountsChart", [
+        { label: "Clientes nos deben", value: clientTotals.nosDeben, kind: "blue" },
+        { label: "Clientes debemos", value: clientTotals.debemos, kind: "danger" },
+        { label: "Proveedores nos deben", value: providerTotals.nosDeben, kind: "blue" },
+        { label: "Proveedores debemos", value: providerTotals.debemos, kind: "danger" }
+      ]);
+      renderBarChart("cashChart", [
+        { label: "Venta directa", value: cashVentaDirecta, kind: "blue" },
+        { label: "Caja BS AS", value: state.cash.bsas, kind: "" },
+        { label: "Caja Salta", value: state.cash.salta, kind: "" },
+        { label: "Caja dolar", value: state.cash.dolar, kind: "" }
+      ]);
+      document.getElementById("clientSummary").innerHTML = renderAccountSummary(state.clients, "clients");
+      document.getElementById("providerSummary").innerHTML = renderAccountSummary(state.providers, "providers");
+      document.getElementById("clientsTable").innerHTML = renderAccountTable(state.clients, "clients");
+      document.getElementById("providersTable").innerHTML = renderAccountTable(state.providers, "providers");
+      document.getElementById("clientsCount").textContent = `${state.clients.length} clientes`;
+      document.getElementById("providersCount").textContent = `${state.providers.length} proveedores`;
+      document.getElementById("cashVentaDirecta").value = money(cashVentaDirecta);
+      document.getElementById("cashBsAs").value = state.cash.bsas ? money(state.cash.bsas) : "";
+      document.getElementById("cashSalta").value = state.cash.salta ? money(state.cash.salta) : "";
+      document.getElementById("cashDolar").value = state.cash.dolar ? money(state.cash.dolar) : "";
+      document.getElementById("openMovementsSummary").innerHTML = state.movements.filter(m => !m.closed).length
+        ? `<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Camionero</th><th class="num">Saldo</th><th>Estado</th></tr></thead><tbody>${state.movements.filter(m => !m.closed).map(m => `<tr><td>${escapeHtml(m.date)}</td><td>${escapeHtml(m.client)}</td><td>${escapeHtml(m.driver)}</td><td class="num">${money(movementBalance(m))}</td><td>${movementStatus(m)}</td></tr>`).join("")}</tbody></table>`
+        : `<div class="empty">No hay movimientos abiertos.</div>`;
+      renderMovements();
+      renderMerchandise();
+      renderPriceList();
+      renderReport();
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[ch]));
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, "&#096;");
+    }
+
+    document.querySelectorAll(".tab").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+        document.querySelectorAll(".tab-page").forEach(page => page.classList.add("hidden"));
+        button.classList.add("active");
+        document.getElementById(`tab-${button.dataset.tab}`).classList.remove("hidden");
+        renderReport();
+      });
+    });
+
+    document.getElementById("parseClientsBtn").addEventListener("click", () => {
+      state.clients = parseTwoColumn(document.getElementById("clientsPaste").value, "client");
+      document.getElementById("clientsPaste").value = "";
+      saveState();
+    });
+
+    document.getElementById("parseProvidersBtn").addEventListener("click", () => {
+      state.providers = parseTwoColumn(document.getElementById("providersPaste").value, "provider");
+      document.getElementById("providersPaste").value = "";
+      saveState();
+    });
+
+    document.getElementById("clearClientsBtn").addEventListener("click", () => {
+      state.clients = [];
+      saveState();
+    });
+
+    document.getElementById("clearProvidersBtn").addEventListener("click", () => {
+      state.providers = [];
+      saveState();
+    });
+
+    document.getElementById("saveCashBtn").addEventListener("click", () => {
+      state.cash.bsas = parseMoney(document.getElementById("cashBsAs").value);
+      state.cash.salta = parseMoney(document.getElementById("cashSalta").value);
+      state.cash.dolar = parseMoney(document.getElementById("cashDolar").value);
+      saveState();
+    });
+
+    document.getElementById("addMovementBtn").addEventListener("click", () => {
+      const amount = parseMoney(document.getElementById("movAmount").value);
+      if (!amount) return alert("Carga un cobro valido.");
+      state.movements.push({
+        id: crypto.randomUUID(),
+        date: document.getElementById("movDate").value || new Date().toISOString().slice(0, 10),
+        amount,
+        client: document.getElementById("movClient").value.trim(),
+        driver: document.getElementById("movDriver").value.trim(),
+        detail: document.getElementById("movDetail").value.trim(),
+        records: [],
+        closed: false,
+        createdAt: new Date().toISOString()
+      });
+      ["movAmount", "movClient", "movDriver", "movDetail"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("movDate").value = new Date().toISOString().slice(0, 10);
+      saveState();
+    });
+
+    document.getElementById("movementsList").addEventListener("click", event => {
+      const action = event.target.dataset.action;
+      if (!action) return;
+      const card = event.target.closest(".movement");
+      const movement = state.movements.find(m => m.id === card.dataset.id);
+      if (!movement) return;
+      if (action === "add-record") {
+        const type = card.querySelector('[data-field="record-type"]').value;
+        const amountInput = card.querySelector('[data-field="record-amount"]');
+        const noteInput = card.querySelector('[data-field="record-note"]');
+        const amount = parseMoney(amountInput.value);
+        if (!amount) return alert("Carga un importe valido para el registro.");
+        movement.records.push({ id: crypto.randomUUID(), type, amount, note: noteInput.value.trim(), createdAt: new Date().toISOString() });
+        amountInput.value = "";
+        noteInput.value = "";
+        saveState();
+      }
+      if (action === "toggle-close") {
+        movement.closed = !movement.closed;
+        saveState();
+      }
+      if (action === "delete-movement" && confirm("Eliminar este movimiento?")) {
+        state.movements = state.movements.filter(m => m.id !== movement.id);
+        saveState();
+      }
+    });
+
+    document.getElementById("movementFilter").addEventListener("change", renderMovements);
+
+    document.getElementById("parseMerchBtn").addEventListener("click", () => {
+      const rows = parseRows(document.getElementById("merchPaste").value);
+      const batchId = crypto.randomUUID();
+      const items = rows
+        .filter(cols => cols.length >= 5)
+        .filter(cols => !/fecha/i.test(cols[0]))
+        .map(cols => {
+          const article = cols[3] || "";
+          return {
+            id: crypto.randomUUID(),
+            date: normalizeDate(cols[0]),
+            quantity: parseMoney(cols[1]),
+            amount: parseMoney(cols[2]),
+            article,
+            provider: cols[4] || "",
+            brand: inferBrand(article),
+            relleno: extractRelleno(article),
+            team: "",
+            driver: "",
+            payment: "",
+            detail: "",
+            isNew: true,
+            batchId,
+            createdAt: new Date().toISOString()
+          };
+        });
+      state.merchandise = state.merchandise.map(item => ({ ...item, isNew: false }));
+      state.merchandise.unshift(...items);
+      document.getElementById("merchPaste").value = "";
+      saveState();
+    });
+
+    document.getElementById("merchTable").addEventListener("input", event => {
+      const field = event.target.dataset.merch;
+      if (!field) return;
+      const row = event.target.closest("tr");
+      const item = state.merchandise.find(m => m.id === row.dataset.id);
+      if (!item) return;
+      item[field] = event.target.value;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderPriceList();
+    });
+
+    document.getElementById("priceSearch").addEventListener("input", renderPriceList);
+
+    document.getElementById("merchTable").addEventListener("click", event => {
+      if (event.target.dataset.action !== "delete-merch") return;
+      const row = event.target.closest("tr");
+      if (!confirm("Eliminar esta entrada de mercaderia?")) return;
+      state.merchandise = state.merchandise.filter(m => m.id !== row.dataset.id);
+      saveState();
+    });
+
+    document.getElementById("saveBtn").addEventListener("click", saveState);
+
+    document.getElementById("chooseAutoSaveBtn").addEventListener("click", async () => {
+      if (!("showSaveFilePicker" in window)) {
+        alert("Tu navegador no permite guardar automaticamente un JSON desde un HTML local. Usa Exportar JSON como respaldo.");
+        return;
+      }
+      try {
+        autoSaveHandle = await window.showSaveFilePicker({
+          suggestedName: "control_diario_abudabi_datos.json",
+          types: [{
+            description: "Archivo JSON",
+            accept: { "application/json": [".json"] }
+          }]
+        });
+        await storeHandle(autoSaveHandle);
+        await writeJsonToHandle(true);
+        alert("Listo. A partir de ahora, cada vez que guardes o cargues datos, se actualiza ese JSON.");
+      } catch (error) {
+        setAutoSaveStatus("JSON autosave sin elegir");
+      }
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `control-diario-abudabi-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("importFile").addEventListener("change", async event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        state = { ...structuredClone(initialState), ...JSON.parse(await file.text()) };
+        saveState();
+      } catch {
+        alert("No se pudo importar el archivo.");
+      }
+      event.target.value = "";
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      if (!confirm("Vaciar todos los datos guardados en este navegador?")) return;
+      state = structuredClone(initialState);
+      saveState();
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => {
+      renderReport();
+      window.print();
+    });
+
+    document.getElementById("movDate").value = new Date().toISOString().slice(0, 10);
+    initAutoSave();
+    render();
+  </script>
+</body>
+</html>
